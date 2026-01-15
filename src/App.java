@@ -5,13 +5,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.BorderPane;
 import java.util.ArrayList;
 import javafx.scene.paint.Color;
-
+import javafx.scene.control.TextField;
 import javafx.scene.shape.*;
+import javafx.scene.text.Text;
 public class App extends Application{
 
 	@Override
@@ -20,22 +22,43 @@ public class App extends Application{
 		stage.setTitle("Minimum Spanning Tree");
 		stage.show();
 		BorderPane bp = new BorderPane();
-		HBox centerBox = new HBox(10);
+		HBox topBox = new HBox(10);
 		ArrayList<MSTNode> nodes = new ArrayList<MSTNode>();
-		HBox nodeBox = new HBox(centerBox.getWidth()/(nodes.size()+1));
+		ArrayList<StackPane> nodeViews = new ArrayList<StackPane>();
 		
-		centerBox.setAlignment(Pos.CENTER);
+		topBox.setAlignment(Pos.CENTER);
 		Button btn_addNode = new Button("Add Node");
 		Button btn_remLastNode = new Button("Remove Previous Node");
-		centerBox.getChildren().addAll(btn_addNode,btn_remLastNode,nodeBox);
-		bp.setCenter(centerBox);
+		TextField tf_newNode = new TextField();
+		topBox.getChildren().addAll(tf_newNode,btn_addNode,btn_remLastNode);
+		
+		bp.setTop(topBox);
 		
 		Scene scene = new Scene(bp,800,600);
+		//int y
+		HBox nodeBox = new HBox(15);
+		nodeBox.setAlignment(Pos.CENTER);
+		bp.setCenter(nodeBox);
+	
 		btn_addNode.addEventHandler(MouseEvent.MOUSE_CLICKED, (event) -> {
-			MSTNode newNode = new MSTNode((int) Math.random()*10);
+			MSTNode newNode = new MSTNode(Double.valueOf(tf_newNode.getText()));
 			nodes.add(newNode);
-			Circle circle = new Circle(25.0, 25.0, 10, Color.ANTIQUEWHITE);
-			nodeBox.getChildren().addAll(circle);
+			Circle circle = new Circle(20, Color.rgb(144,238,144));
+			
+			Text text = new Text(tf_newNode.getText());
+			
+			StackPane stack = new StackPane(circle, text);
+			nodeViews.add(stack);
+			nodeBox.getChildren().add(stack);
+			tf_newNode.clear();
+			event.consume();
+		});
+		btn_remLastNode.addEventHandler(MouseEvent.MOUSE_CLICKED, (event) -> {
+			if (!nodes.isEmpty()) {
+				nodes.remove(nodes.size()-1);
+				StackPane lastView = nodeViews.remove(nodeViews.size()-1);
+				nodeBox.getChildren().remove(lastView);
+			}
 			event.consume();
 		});
 		stage.setScene(scene);
