@@ -56,6 +56,12 @@ public class Graph<DataType> {
 		nodes.remove(node);
 	}
 	public String prim(MSTNode startNode) {
+		if (startNode == null) {
+			throw new NullPointerException("Starting Node Cannot Be Null");
+		}
+		if (startNode.edgesLeaving.size()==0) {
+			return "Start Node: " + startNode.data.toString() + "\nTotal MST Weight: " + Double.valueOf(startNode.data.toString());
+		}
 		ArrayList<MSTEdge> treeEdges = new ArrayList<MSTEdge>();
 		ArrayList<MSTNode> treeNodes = new ArrayList<MSTNode>();
 		treeNodes.add(startNode);
@@ -95,9 +101,13 @@ public class Graph<DataType> {
 			treeNodes.add(smallest.succ);
 		}
 		String ret = "";
+		double total = 0.0;
 		for (MSTEdge m : treeEdges) {
 			ret += m.toString() + "\n";
+			total += m.edgeWeight;
 		}
+		ret += "Total MST Weight: ";
+		ret += total;
 		return ret;
 	}
 	
