@@ -1,27 +1,35 @@
 import java.util.ArrayList;
 
-public class MSTQueue{
-	private ArrayList<MSTNode> nodes;
-	public MSTQueue() {
-		nodes = new ArrayList<MSTNode>();
-		
-	}
-	public void enqueue(MSTNode node) {
-		nodes.add(node);
-	}
-	public MSTNode deque() {
-		return nodes.remove(0);
-	}
-	public int size() {
-		return nodes.size();
-	}
-	public boolean isEmpty() {
-		if (nodes.isEmpty()) {
-			return true;
-		}
-		return false;
-	}
-	public String toString() {
-		return nodes.toString();
-	}
+public class MSTQueue<DataType> {
+
+    private ArrayList<MSTNode<DataType>> nodes;
+
+    public MSTQueue() {
+        nodes = new ArrayList<>();
+    }
+
+    public void enqueue(MSTNode<DataType> node) {
+        nodes.add(node);
+    }
+
+    public MSTNode<DataType> dequeue() {
+        if (nodes.isEmpty()) {
+            throw new IllegalStateException("Cannot dequeue from an empty queue.");
+        }
+
+        return nodes.remove(0);
+    }
+
+    public int size() {
+        return nodes.size();
+    }
+
+    public boolean isEmpty() {
+        return nodes.isEmpty();
+    }
+
+    @Override
+    public String toString() {
+        return nodes.toString();
+    }
 }

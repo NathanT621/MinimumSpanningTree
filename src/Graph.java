@@ -1,153 +1,178 @@
 import java.util.ArrayList;
 import java.util.HashSet;
+
 public class Graph<DataType> {
-	private ArrayList<MSTNode> nodes;
-	
-	public Graph(ArrayList<MSTNode> nodes) {
-		this.nodes = nodes;
-		
-	}
 
-	public int getGraphSize() {
-		return nodes.size();
-	}
+    private ArrayList<MSTNode<DataType>> nodes;
+    private int idCounter;
 
-	public boolean containsNode(MSTNode node) {
+    public Graph() {
+        nodes = new ArrayList<>();
+        idCounter = 0;
+    }
 
-		for (MSTNode n : nodes) {
-			if (n.data.equals(node.data) && n.edgesEntering.equals(node.edgesEntering)
-					&& n.edgesLeaving.equals(node.edgesLeaving)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    public int getGraphSize() {
+        return nodes.size();
+    }
 
-	@SuppressWarnings("unchecked")
-	public void addNode(DataType value, ArrayList<MSTNode> refBy, ArrayList<MSTNode> refTo) {
-	
-		
-		MSTNode newNode = new MSTNode(value);
-		newNode.edgesEntering = refBy;
-		newNode.edgesLeaving = refTo;
-		if (this.containsNode(newNode)) {
-			return;
-		}
-		for (MSTNode n : refBy) {
-			n.edgesLeaving.add(newNode);
-		}
-		for (MSTNode n : refTo) {
-			n.edgesEntering.add(newNode);
-		}
+    public ArrayList<MSTNode<DataType>> getNodes() {
+        return nodes;
+    }
 
-	}
-	public void removeNode(MSTNode node) {
-		if (!this.containsNode(node)) {
-			return;
-		}
-		ArrayList<MSTEdge> outgoingEdges = node.edgesLeaving;
-		ArrayList<MSTEdge> incomingEdges = node.edgesEntering;
-		for (MSTEdge outgoingEdge : outgoingEdges) {
-			outgoingEdge.succ.edgesEntering.remove(outgoingEdge);
-		}
-		for (MSTEdge incomingEdge : incomingEdges) {
-			incomingEdge.pred.edgesLeaving.remove(incomingEdge);
-		}
-		nodes.remove(node);
-	}
-	public String prim(MSTNode startNode) {
-		if (startNode == null) {
-			throw new NullPointerException("Starting Node Cannot Be Null");
-		}
-		if (startNode.edgesLeaving.size()==0) {
-			return "Start Node: " + startNode.data.toString() + "\nTotal MST Weight: " + Double.valueOf(startNode.data.toString());
-		}
-		ArrayList<MSTEdge> treeEdges = new ArrayList<MSTEdge>();
-		ArrayList<MSTNode> treeNodes = new ArrayList<MSTNode>();
-		treeNodes.add(startNode);
-		// Add all outgoing edges from tree nodes to contenders 
-		ArrayList<MSTEdge> contenderEdges;
-		while (!this.isSpanningTree(treeEdges, treeNodes)) {
-			contenderEdges = new ArrayList<MSTEdge>();
-			for (int x = 0; x<treeNodes.size(); x++) {
-				for (int y = 0; y<treeNodes.get(x).edgesLeaving.size();y++) {
-					contenderEdges.add((MSTEdge) treeNodes.get(x).edgesLeaving.get(y));
-				}
-			}
-			for (int m = 0; m<contenderEdges.size(); m++) {
-				if (treeNodes.contains(contenderEdges.get(m).succ)) {
-					contenderEdges.remove(m);
-					m--;
-				}
-			}
-//			for (int treeNode = 0; treeNode<treeNodes.size(); treeNode++) {
-//				for (int contenderEdge = 0; contenderEdge< contenderEdges.size(); contenderEdge++) {
-//					if (pathExists(treeNodes.get(treeNode), contenderEdges.get(contenderEdge).succ)) {
-//						// We remove an element from the list, decrease the index to offset
-//						contenderEdge--;
-//						contenderEdges.remove(contenderEdge);
-//					}
-//				}
-//			}
-			MSTEdge smallest = contenderEdges.get(0);
-				
-			
-			for (MSTEdge m : contenderEdges) {
-				if (m.edgeWeight < smallest.edgeWeight) {
-					smallest = m;
-				}
-			}
-			treeEdges.add(smallest);
-			treeNodes.add(smallest.succ);
-		}
-		String ret = "";
-		double total = 0.0;
-		for (MSTEdge m : treeEdges) {
-			ret += m.toString() + "\n";
-			total += m.edgeWeight;
-		}
-		ret += "Total MST Weight: ";
-		ret += total;
-		return ret;
-	}
-	
-	// Make use of BFS
-	private boolean PathExists(MSTNode start, MSTNode end) {
-		if (start.equals(end)) {
-			return true;
-		}
-		MSTQueue queue = new MSTQueue();
-		HashSet<MSTNode> visited = new HashSet<MSTNode>();
-		queue.enqueue(start);
-		visited.add(start);
-		while (!queue.isEmpty()) {
-			MSTNode visitedNode = queue.deque();
-			
-			ArrayList<MSTNode> neighbors = new ArrayList<MSTNode>();
-			for (int x = 0; x<visitedNode.edgesLeaving.size();x++) {
-				neighbors.add(((MSTEdge) visitedNode.edgesLeaving.get(x)).succ);
-			}
-			// Neighbors created, use a hash set to check if each neighbor has been visited and should be explored further
-			for (int x = 0; x<neighbors.size(); x++) {
-				MSTNode currentNeighbor = neighbors.get(x);
-			if (!visited.contains(currentNeighbor)) {
-				if (currentNeighbor.equals(end)) {
-					return true;
-				}
-				else {
-					visited.add(currentNeighbor);
-					queue.enqueue(currentNeighbor);
-				}
-			}
-		}
-		}
-		return false;
-	
-	}
-	private boolean isSpanningTree(ArrayList<MSTEdge> treeEdges, ArrayList<MSTNode> treeNodes) {
-		if (treeNodes.size()==nodes.size() && treeEdges.size() == nodes.size()-1) {
-			return true;
-		}
-		return false;
-	}
+    public MSTNode<DataType> addNode(DataType value) {
+        MSTNode<DataType> newNode = new MSTNode<>(value, idCounter);
+        idCounter++;
+
+        nodes.add(newNode);
+        return newNode;
+    }
+
+    public boolean containsNode(MSTNode<DataType> node) {
+        return nodes.contains(node);
+    }
+
+    public MSTEdge<DataType> addEdge(double weight, MSTNode<DataType> pred, MSTNode<DataType> succ) {
+        if (pred == null || succ == null) {
+            throw new IllegalArgumentException("Edge endpoints cannot be null.");
+        }
+
+        if (!containsNode(pred) || !containsNode(succ)) {
+            throw new IllegalArgumentException("Both nodes must already be in the graph.");
+        }
+
+        return new MSTEdge<>(weight, pred, succ);
+    }
+
+    public void removeNode(MSTNode<DataType> node) {
+        if (node == null || !containsNode(node)) {
+            return;
+        }
+
+        ArrayList<MSTEdge<DataType>> outgoingEdges = new ArrayList<>(node.getEdgesLeaving());
+        ArrayList<MSTEdge<DataType>> incomingEdges = new ArrayList<>(node.getEdgesEntering());
+
+        for (MSTEdge<DataType> edge : outgoingEdges) {
+            edge.getSucc().removeEdgeEntering(edge);
+        }
+
+        for (MSTEdge<DataType> edge : incomingEdges) {
+            edge.getPred().removeEdgeLeaving(edge);
+        }
+
+        nodes.remove(node);
+    }
+
+    public ArrayList<MSTEdge<DataType>> primEdges(MSTNode<DataType> startNode) {
+        if (startNode == null) {
+            throw new NullPointerException("Starting node cannot be null.");
+        }
+
+        if (!containsNode(startNode)) {
+            throw new IllegalArgumentException("Starting node must be in the graph.");
+        }
+
+        ArrayList<MSTEdge<DataType>> treeEdges = new ArrayList<>();
+        ArrayList<MSTNode<DataType>> treeNodes = new ArrayList<>();
+
+        treeNodes.add(startNode);
+
+        while (!isSpanningTree(treeEdges, treeNodes)) {
+            MSTEdge<DataType> smallestEdge = null;
+            MSTNode<DataType> nextNode = null;
+
+            for (MSTNode<DataType> treeNode : treeNodes) {
+                for (MSTEdge<DataType> edge : getAllEdgesForNode(treeNode)) {
+                    MSTNode<DataType> otherNode = edge.getOtherNode(treeNode);
+
+                    if (!treeNodes.contains(otherNode)) {
+                        if (smallestEdge == null
+                                || edge.getEdgeWeight() < smallestEdge.getEdgeWeight()) {
+                            smallestEdge = edge;
+                            nextNode = otherNode;
+                        }
+                    }
+                }
+            }
+
+            if (smallestEdge == null || nextNode == null) {
+                return new ArrayList<>();
+            }
+
+            treeEdges.add(smallestEdge);
+            treeNodes.add(nextNode);
+        }
+
+        return treeEdges;
+    }
+
+    public String prim(MSTNode<DataType> startNode) {
+        if (nodes.isEmpty()) {
+            return "Graph is empty.";
+        }
+
+        ArrayList<MSTEdge<DataType>> treeEdges = primEdges(startNode);
+
+        if (nodes.size() > 1 && treeEdges.isEmpty()) {
+            return "Graph is not connected. MST cannot be completed.";
+        }
+
+        String result = "";
+        double total = 0.0;
+
+        for (MSTEdge<DataType> edge : treeEdges) {
+            result += edge.toString() + "\n";
+            total += edge.getEdgeWeight();
+        }
+
+        result += "Total MST Weight: " + total;
+        return result;
+    }
+
+    private ArrayList<MSTEdge<DataType>> getAllEdgesForNode(MSTNode<DataType> node) {
+        ArrayList<MSTEdge<DataType>> allEdges = new ArrayList<>();
+
+        allEdges.addAll(node.getEdgesLeaving());
+        allEdges.addAll(node.getEdgesEntering());
+
+        return allEdges;
+    }
+
+    private boolean pathExists(MSTNode<DataType> start, MSTNode<DataType> end) {
+        if (start.equals(end)) {
+            return true;
+        }
+
+        MSTQueue<DataType> queue = new MSTQueue<>();
+        HashSet<MSTNode<DataType>> visited = new HashSet<>();
+
+        queue.enqueue(start);
+        visited.add(start);
+
+        while (!queue.isEmpty()) {
+            MSTNode<DataType> currentNode = queue.dequeue();
+
+            for (MSTEdge<DataType> edge : getAllEdgesForNode(currentNode)) {
+                MSTNode<DataType> neighbor = edge.getOtherNode(currentNode);
+
+                if (!visited.contains(neighbor)) {
+                    if (neighbor.equals(end)) {
+                        return true;
+                    }
+
+                    visited.add(neighbor);
+                    queue.enqueue(neighbor);
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isSpanningTree(
+            ArrayList<MSTEdge<DataType>> treeEdges,
+            ArrayList<MSTNode<DataType>> treeNodes
+    ) {
+        return treeNodes.size() == nodes.size()
+                && treeEdges.size() == nodes.size() - 1;
+    }
 }

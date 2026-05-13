@@ -1,16 +1,49 @@
+public class MSTEdge<DataType> {
 
-public class MSTEdge<DataType>{
-public double edgeWeight;
-public MSTNode pred;
-public MSTNode succ;
-public MSTEdge(double weight, MSTNode pred, MSTNode succ) {
-	this.edgeWeight = weight;
-	this.pred = pred;
-	this.pred.edgesLeaving.add(this);
-	this.succ = succ;
-	this.succ.edgesEntering.add(this);
-}
-public String toString() {
-	return "[Start Node: " + pred.data.toString() + ", End Node: " + succ.data.toString() + ", Weight: " + edgeWeight + "], ";
-}
+    private double edgeWeight;
+    private MSTNode<DataType> pred;
+    private MSTNode<DataType> succ;
+
+    public MSTEdge(double edgeWeight, MSTNode<DataType> pred, MSTNode<DataType> succ) {
+        if (pred == null || succ == null) {
+            throw new IllegalArgumentException("Edge endpoints cannot be null.");
+        }
+
+        this.edgeWeight = edgeWeight;
+        this.pred = pred;
+        this.succ = succ;
+
+        pred.addEdgeLeaving(this);
+        succ.addEdgeEntering(this);
+    }
+
+    public double getEdgeWeight() {
+        return edgeWeight;
+    }
+
+    public MSTNode<DataType> getPred() {
+        return pred;
+    }
+
+    public MSTNode<DataType> getSucc() {
+        return succ;
+    }
+
+    @Override
+    public String toString() {
+        return "[Start Node: " + pred.getData()
+                + ", End Node: " + succ.getData()
+                + ", Weight: " + edgeWeight + "]";
+    }
+    public MSTNode<DataType> getOtherNode(MSTNode<DataType> node) {
+        if (node == pred) {
+            return succ;
+        }
+
+        if (node == succ) {
+            return pred;
+        }
+
+        throw new IllegalArgumentException("Node is not connected to this edge.");
+    }
 }
