@@ -12,9 +12,6 @@ public class MSTEdge<DataType> {
         this.edgeWeight = edgeWeight;
         this.pred = pred;
         this.succ = succ;
-
-        pred.addEdgeLeaving(this);
-        succ.addEdgeEntering(this);
     }
 
     public double getEdgeWeight() {
@@ -29,13 +26,11 @@ public class MSTEdge<DataType> {
         return succ;
     }
 
-    @Override
-    public String toString() {
-        return "[Start Node: " + pred.getData()
-                + ", End Node: " + succ.getData()
-                + ", Weight: " + edgeWeight + "]";
-    }
     public MSTNode<DataType> getOtherNode(MSTNode<DataType> node) {
+        if (node == null) {
+            throw new IllegalArgumentException("Node cannot be null.");
+        }
+
         if (node == pred) {
             return succ;
         }
@@ -45,5 +40,12 @@ public class MSTEdge<DataType> {
         }
 
         throw new IllegalArgumentException("Node is not connected to this edge.");
+    }
+
+    @Override
+    public String toString() {
+        return "[Start Node: " + pred.getData()
+                + ", End Node: " + succ.getData()
+                + ", Weight: " + edgeWeight + "]";
     }
 }

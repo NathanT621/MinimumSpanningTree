@@ -14,6 +14,9 @@ public class Graph<DataType> {
     public int getGraphSize() {
         return nodes.size();
     }
+    public int getId() {
+    	return idCounter;
+    }
 
     public ArrayList<MSTNode<DataType>> getNodes() {
         return nodes;
@@ -40,9 +43,13 @@ public class Graph<DataType> {
             throw new IllegalArgumentException("Both nodes must already be in the graph.");
         }
 
-        return new MSTEdge<>(weight, pred, succ);
-    }
+        MSTEdge<DataType> edge = new MSTEdge<>(weight, pred, succ);
 
+        pred.addEdgeLeaving(edge);
+        succ.addEdgeEntering(edge);
+
+        return edge;
+    }
     public void removeNode(MSTNode<DataType> node) {
         if (node == null || !containsNode(node)) {
             return;
@@ -62,6 +69,48 @@ public class Graph<DataType> {
         nodes.remove(node);
     }
 
+//    public ArrayList<MSTEdge<DataType>> primEdges(MSTNode<DataType> startNode) {
+//        if (startNode == null) {
+//            throw new NullPointerException("Starting node cannot be null.");
+//        }
+//
+//        if (!containsNode(startNode)) {
+//            throw new IllegalArgumentException("Starting node must be in the graph.");
+//        }
+//
+//        ArrayList<MSTEdge<DataType>> treeEdges = new ArrayList<>();
+//        ArrayList<MSTNode<DataType>> treeNodes = new ArrayList<>();
+//
+//        treeNodes.add(startNode);
+//
+//        while (!isSpanningTree(treeEdges, treeNodes)) {
+//            MSTEdge<DataType> smallestEdge = null;
+//            MSTNode<DataType> nextNode = null;
+//
+//            for (MSTNode<DataType> treeNode : treeNodes) {
+//                for (MSTEdge<DataType> edge : getAllEdgesForNode(treeNode)) {
+//                    MSTNode<DataType> otherNode = edge.getOtherNode(treeNode);
+//
+//                    if (!treeNodes.contains(otherNode)) {
+//                        if (smallestEdge == null
+//                                || edge.getEdgeWeight() < smallestEdge.getEdgeWeight()) {
+//                            smallestEdge = edge;
+//                            nextNode = otherNode;
+//                        }
+//                    }
+//                }
+//            }
+//
+//            if (smallestEdge == null || nextNode == null) {
+//                return new ArrayList<>();
+//            }
+//
+//            treeEdges.add(smallestEdge);
+//            treeNodes.add(nextNode);
+//        }
+//
+//        return treeEdges;
+//    }
     public ArrayList<MSTEdge<DataType>> primEdges(MSTNode<DataType> startNode) {
         if (startNode == null) {
             throw new NullPointerException("Starting node cannot be null.");
@@ -76,12 +125,20 @@ public class Graph<DataType> {
 
         treeNodes.add(startNode);
 
+        System.out.println("Starting Prim's at: " + startNode);
+
         while (!isSpanningTree(treeEdges, treeNodes)) {
             MSTEdge<DataType> smallestEdge = null;
             MSTNode<DataType> nextNode = null;
 
+            System.out.println("\nTree currently has " + treeNodes.size() + " nodes.");
+
             for (MSTNode<DataType> treeNode : treeNodes) {
-                for (MSTEdge<DataType> edge : getAllEdgesForNode(treeNode)) {
+                ArrayList<MSTEdge<DataType>> edges = getAllEdgesForNode(treeNode);
+
+                System.out.println("Checking node: " + treeNode + ", edges found: " + edges.size());
+
+                for (MSTEdge<DataType> edge : edges) {
                     MSTNode<DataType> otherNode = edge.getOtherNode(treeNode);
 
                     if (!treeNodes.contains(otherNode)) {
@@ -95,16 +152,34 @@ public class Graph<DataType> {
             }
 
             if (smallestEdge == null || nextNode == null) {
+                System.out.println("FAILED: Could not find an edge leaving the current tree.");
+
+                System.out.println("Reached nodes:");
+                for (MSTNode<DataType> node : treeNodes) {
+                    System.out.println(node);
+                }
+
+                System.out.println("Unreached nodes:");
+                for (MSTNode<DataType> node : nodes) {
+                    if (!treeNodes.contains(node)) {
+                        System.out.println(node);
+                    }
+                }
+
                 return new ArrayList<>();
             }
+
+            System.out.println("Chosen edge: " + smallestEdge);
+            System.out.println("Adding node: " + nextNode);
 
             treeEdges.add(smallestEdge);
             treeNodes.add(nextNode);
         }
 
+        System.out.println("Prim's completed. Edges in MST: " + treeEdges.size());
+
         return treeEdges;
     }
-
     public String prim(MSTNode<DataType> startNode) {
         if (nodes.isEmpty()) {
             return "Graph is empty.";
@@ -166,6 +241,9 @@ public class Graph<DataType> {
         }
 
         return false;
+    }
+    public MSTNode<DataType> nodeLookup(int id){
+    	return nodes.get(id);
     }
 
     private boolean isSpanningTree(
